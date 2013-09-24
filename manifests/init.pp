@@ -1,41 +1,31 @@
-# == Class: windows_chrome
+# Class: windows_chrome
 #
-# Full description of class windows_chrome here.
+# This module downloads then installs the Google Chrome Web Browser
 #
-# === Parameters
+# Parameters: none
 #
-# Document parameters here.
+# Actions:
 #
-# [*sample_parameter*]
-#   Explanation of what this parameter affects and what it defaults to.
-#   e.g. "Specify one or more upstream ntp servers as an array."
-#
-# === Variables
-#
-# Here you should define a list of variables that this module would require.
-#
-# [*sample_variable*]
-#   Explanation of how this variable affects the funtion of this class and if
-#   it has a default. e.g. "The parameter enc_ntp_servers must be set by the
-#   External Node Classifier as a comma separated list of hostnames." (Note,
-#   global variables should be avoided in favor of class parameters as
-#   of Puppet 2.6.)
-#
-# === Examples
-#
-#  class { windows_chrome:
-#    servers => [ 'pool.ntp.org', 'ntp.local.company.com' ],
-#  }
-#
-# === Authors
-#
-# Author Name <author@domain.com>
-#
-# === Copyright
-#
-# Copyright 2013 Your name here, unless otherwise noted.
-#
-class windows_chrome {
 
+
+class windows::google_chrome {
+
+  $chrome_url = 'https://dl.google.com/tag/s/appguid%3D%7B8A69D345-D564-463C-AFF1-A69D9E530F96%7D%26iid%3D%7B6414C132-7FB2-4B3F-A9F2-AC9E014598BE%7D%26lang%3Den%26browser%3D4%26usagestats%3D0%26appname%3DGoogle%2520Chrome%26needsadmin%3Dtrue/edgedl/chrome/install/GoogleChromeStandaloneEnterprise.msi'
+  $chrome_file = 'GoogleChromeStandaloneEnterprise.msi'
+
+
+  windows_common::download{'GoogleChrome':
+    url  => $chrome_url,
+    file => $chrome_file,
+  }
+
+  package { 'GoogleChromeStandaloneEnterprise':
+    ensure          => installed,
+    source          => "${::temp}\\${chrome_file}",
+    provider        => windows,
+    install_options => ['/PASSIVE',],
+    require         => Commands::Download['GoogleChrome'],
+  }
 
 }
+
