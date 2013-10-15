@@ -1,31 +1,56 @@
-# Class: windows_chrome
+# === Class: windows_chrome
 #
-# This module downloads then installs the Google Chrome Web Browser
+# This module installs Chrome on Windows systems. It also adds an entry to the
+# PATH environment variable.
 #
-# Parameters: none
+# === Parameters
 #
-# Actions:
+# [*url*]
+#   HTTP url where the installer is available. It defaults to main site.
+# [*package*]
+#   Package name in the system.
+# [*file_path*]
+#   This parameter is used to specify a local path for the installer. If it is
+#   set, the remote download from $url is not performed. It defaults to false.
 #
+# === Examples
+#
+# class { 'windows_chrome': }
+#
+# class { 'windows_chrome':
+#   $url     => 'http://192.168.1.1/files/chrome.exe',
+#   $package => 'Google Chrome',
+# }
+#
+# === Authors
+# 
+#
+class windows_chrome (
+  $url       = $::windows_chrome::params::url,
+  $package   = $::windows_chrome::params::package,
+  $file_path = false,
+) inherits windows_chrome::params {
 
-
-class windows::google_chrome {
-
-  $chrome_url = 'https://dl.google.com/tag/s/appguid%3D%7B8A69D345-D564-463C-AFF1-A69D9E530F96%7D%26iid%3D%7B6414C132-7FB2-4B3F-A9F2-AC9E014598BE%7D%26lang%3Den%26browser%3D4%26usagestats%3D0%26appname%3DGoogle%2520Chrome%26needsadmin%3Dtrue/edgedl/chrome/install/GoogleChromeStandaloneEnterprise.msi'
-  $chrome_file = 'GoogleChromeStandaloneEnterprise.msi'
-
-
-  windows_common::download{'GoogleChrome':
-    url  => $chrome_url,
-    file => $chrome_file,
+  if $file_path {
+    $chrome_installer_path = $file_path
+  } else {
+    $chrome_installer_path = "${::temp}\\${package}.exe"
+    windows_common::remote_file{'Chrome':
+      source      => $url,
+      destination => $chrome_installer_path,
+      before      => Package[$package],
+    }
   }
-
-  package { 'GoogleChromeStandaloneEnterprise':
+  package { $package:
     ensure          => installed,
-    source          => "${::temp}\\${chrome_file}",
-    provider        => windows,
-    install_options => ['/PASSIVE',],
-    require         => Commands::Download['GoogleChrome'],
+    source          => $chrome_installer_path,
+    install_options => ['/VERYSILENT','/SUPPRESSMSGBOXES','/LOG'],
   }
 
+  $chrome_path = 'C:\Program Files (x86)\Google\Chrome\Application'
+ 
+  windows_path { $chrome_path:
+    ensure  => present,
+    require => Package[$package],
+  }
 }
-
