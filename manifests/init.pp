@@ -46,9 +46,7 @@ class windows_chrome (
     source          => $chrome_installer_path,
     install_options => ['/VERYSILENT','/SUPPRESSMSGBOXES','/LOG'],
   }
-
   $chrome_path = 'C:\Program Files (x86)\Google\Chrome\Application'
- 
   windows_path { $chrome_path:
     ensure  => present,
     require => Package[$package],

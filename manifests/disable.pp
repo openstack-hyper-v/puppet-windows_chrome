@@ -10,7 +10,7 @@ class windows_chrome::disable (
     ensure  => absent,
   }
 
-  windows_path { $chrome_path:
+  windows_path { $::chrome_path:
     ensure  => absent,
   }
 
